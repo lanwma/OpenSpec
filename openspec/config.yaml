@@ -18,9 +18,16 @@ rules:
     - Requirements involving paths must specify cross-platform behavior
     - Be explicit about mechanisms, not just outcomes (say HOW, not just WHAT)
     - If we generate artifacts, specify deletion/modification by explicit list lookup, not pattern matching
+    - Scenarios with THEN/AND statements serve as test acceptance criteria
+  tests:
+    - Each scenario in specs maps to exactly one test case (1:1 relationship)
+    - Test framework: vitest (see vitest.config.ts)
+    - Test files location: test/ directory mirroring src/ structure
+    - Use describe/it pattern matching requirement/scenario structure
   tasks:
     - Add Windows CI verification as a task when changes involve file paths
     - Include cross-platform testing considerations
+    - Include test implementation tasks before feature implementation tasks
   design:
     - Document any platform-specific behavior or limitations
     - Prefer Node.js path module over string manipulation for paths

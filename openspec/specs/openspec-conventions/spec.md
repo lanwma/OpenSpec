@@ -53,6 +53,7 @@ openspec/
 └── changes/                # Proposed changes
     ├── [change-name]/      # Descriptive change identifier
     │   ├── proposal.md     # Why, what, and impact
+    │   ├── tests.md        # Test case skeletons from specs (TDD)
     │   ├── tasks.md        # Implementation checklist
     │   ├── design.md       # Technical decisions (optional)
     │   └── specs/          # Complete future state
@@ -274,6 +275,7 @@ openspec/
 └── changes/                # Proposed changes
     ├── [change-name]/      # Descriptive change identifier
     │   ├── proposal.md     # Why, what, and impact
+    │   ├── tests.md        # Test case skeletons from specs (TDD)
     │   ├── tasks.md        # Implementation checklist
     │   ├── design.md       # Technical decisions (optional)
     │   └── specs/          # Complete future state
@@ -481,6 +483,48 @@ A proposal is NOT required for:
 - Non-breaking dependency updates
 - Adding tests for existing behavior
 - Documentation clarifications
+
+## TDD Workflow
+
+### Requirement: TDD Workflow Integration
+
+OpenSpec SHALL support Test-Driven Development by generating test skeletons from spec scenarios and enforcing an iterative implementation loop.
+
+#### Scenario: Test standard source of truth
+
+- **WHEN** defining test acceptance criteria
+- **THEN** specs中的scenario (THEN/AND语句) SHALL be the single source of truth
+- **AND** tests.md SHALL only map behavioral standards to code structure
+- **AND** specific assertions SHALL be determined during implementation
+
+#### Scenario: Generating tests from scenarios
+
+- **WHEN** specs contain scenarios with GIVEN/WHEN/THEN format
+- **THEN** tests.md SHALL contain corresponding test cases
+- **AND** each scenario maps to one test case (1:1 relationship)
+- **AND** test structure follows describe/it pattern
+- **AND** THEN/AND statements are copied as test standard comments
+
+#### Scenario: TDD iterative implementation loop
+
+- **WHEN** implementing a task during apply phase
+- **THEN** the workflow SHALL follow: Implement → Test → Fix → Re-test
+- **AND** tasks SHALL NOT be marked complete until tests pass
+- **AND** if loop exceeds 3 iterations, pause for reassessment
+
+#### Scenario: Test failure handling
+
+- **WHEN** tests fail after implementation
+- **THEN** analyze failure output to identify root cause
+- **AND** fix implementation code (not tests) unless spec is incorrect
+- **AND** re-run tests until all pass
+
+#### Scenario: Loop exit conditions
+
+- **WHEN** all related tests pass
+- **THEN** mark task as complete
+- **AND** proceed to next task
+- **AND** create atomic commit for the completed task
 
 ## Why This Approach
 

@@ -1,6 +1,6 @@
 name: spec-driven
 version: 1
-description: Default OpenSpec workflow - proposal → specs → design → tasks
+description: Default OpenSpec workflow - proposal → specs → tests → design → tasks (TDD)
 artifacts:
   - id: proposal
     generates: proposal.md
@@ -82,6 +82,56 @@ artifacts:
     requires:
       - proposal
 
+  - id: tests
+    generates: tests.md
+    description: Test case skeletons mapped from spec scenarios (TDD)
+    template: tests.md
+    instruction: |
+      Generate test case skeletons from spec scenarios.
+
+      IMPORTANT: specs中的scenario是测试标准的唯一来源。
+      tests.md只负责将行为级标准映射为代码结构。
+
+      For each scenario in specs:
+      - Create a test case with describe/it structure
+      - Map GIVEN to test setup comments
+      - Map WHEN to action trigger comments
+      - Map THEN/AND to assertion placeholders (具体断言由实现时决定)
+
+      Format:
+      ## [Capability Name]
+
+      ### [Requirement Name]
+
+      #### Test: [Scenario Name]
+
+      **测试标准** (来自spec):
+      - WHEN: [condition from scenario]
+      - THEN: [expected behavior]
+      - AND: [additional expectations]
+
+      **测试骨架**:
+      ```typescript
+      describe('[Requirement Name]', () => {
+        it('[Scenario description]', () => {
+          // GIVEN: [setup from scenario]
+
+          // WHEN: [action from scenario]
+
+          // THEN: [behavioral expectation - implement specific assertions]
+          // 测试标准: [copy THEN from scenario]
+        });
+      });
+      ```
+
+      Guidelines:
+      - 测试标准直接引用specs中的THEN/AND语句
+      - 断言占位符使用注释，具体实现由apply阶段决定
+      - 保持scenario与test case的1:1映射关系
+      - 使用项目的测试框架 (vitest/jest/mocha)
+    requires:
+      - specs
+
   - id: design
     generates: design.md
     description: Technical design document with implementation details
@@ -144,10 +194,40 @@ artifacts:
     requires:
       - specs
       - design
+      - tests
 
 apply:
   requires: [tasks]
   tracks: tasks.md
   instruction: |
-    Read context files, work through pending tasks, mark complete as you go.
-    Pause if you hit blockers or need clarification.
+    TDD Iterative Loop - For each task:
+
+    ## 1. IMPLEMENT (实现)
+    - Read the task description and corresponding test case in tests.md
+    - Implement the feature code based on specs and design
+    - Focus on making the feature work first
+
+    ## 2. TEST (测试)
+    - Run the corresponding test(s) for this task
+    - Command: `pnpm test <test-file>` or `pnpm test --grep "<test-name>"`
+    - Observe which tests pass and which fail
+
+    ## 3. FIX (修复) - if tests fail
+    - Analyze test failure output
+    - Identify the root cause (logic error, edge case, integration issue)
+    - Fix the implementation code
+    - Do NOT modify tests unless the spec is wrong
+
+    ## 4. RE-TEST (重测)
+    - Run tests again after fix
+    - Repeat FIX → RE-TEST until all related tests pass
+
+    ## 5. COMPLETE (完成)
+    - Mark task as done: `- [x] X.Y Task description`
+    - Move to next task
+
+    Loop Rules:
+    - Never mark a task complete until its tests pass
+    - If stuck in loop > 3 iterations, pause and reassess the approach
+    - Document any spec clarifications needed
+    - Keep commits atomic: one task = one logical commit
